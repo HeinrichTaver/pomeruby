@@ -1,4 +1,4 @@
-# pomeruby - Yet Another Pomodoro® inspired utility
+# Pomeruby - Yet Another Pomodoro® inspired utility
 
 What makes `pomeruby` different from all the rest?
 It's made by me!
@@ -11,12 +11,12 @@ The Pomodoro® Technique book gives some pretty interesting insights on producti
 This tool is my own interpretation of the book, and an expansion on the ideas presented there.
 
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - [Ruby](https://www.ruby-lang.org)
 
 
-##  🚀 Quick Start
+## Quick Start
 
 ```sh
 git clone https://github.com/HeinrichTaver/pomeruby.git
@@ -24,6 +24,6 @@ cd pomeruby
 ```
 
 
-## ⚖️ Licensing
+## Licensing
 
 [MIT License](https://spdx.org/licenses/MIT.html), see `LICENSE`
