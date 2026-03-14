@@ -1,6 +1,9 @@
 *
 
 !.gitignore
+!Gemfile
+!Gemfile.lock
 !LICENSE
 !README.md
 !mise.toml
+!pomeruby.rb

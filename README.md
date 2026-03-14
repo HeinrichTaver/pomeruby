@@ -23,9 +23,18 @@ This tool is my own interpretation of the book, and an expansion on the ideas pr
 git clone https://github.com/HeinrichTaver/pomeruby.git
 cd pomeruby
 mise install
+mise x -- bundle install
+mise x -- ruby pomeruby.rb
 ```
 
 
 ## Licensing
 
 [MIT License](https://spdx.org/licenses/MIT.html), see `LICENSE`
+
+
+## Acknowledgments
+
+This utility makes use of the following open-source libraries:
+
+- [Charm Ruby](https://github.com/stars/marcoroth/lists/charm-ruby)
