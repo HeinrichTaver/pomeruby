@@ -14,6 +14,7 @@ This tool is my own interpretation of the book, and an expansion on the ideas pr
 ## Tech Stack
 
 - [Ruby](https://www.ruby-lang.org)
+- [Mise](https://mise.jdx.dev)
 
 
 ## Quick Start
@@ -21,6 +22,7 @@ This tool is my own interpretation of the book, and an expansion on the ideas pr
 ```sh
 git clone https://github.com/HeinrichTaver/pomeruby.git
 cd pomeruby
+mise install
 ```
 
 
