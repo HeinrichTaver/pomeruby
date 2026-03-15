@@ -1,17 +1,25 @@
 GEM
   specs:
+    bubbles (0.1.1)
+      bubbletea
+      harmonica
+      lipgloss
     bubbletea (0.1.3-x86_64-linux-gnu)
       lipgloss (~> 0.1)
+    harmonica (0.1.1)
     lipgloss (0.2.2-x86_64-linux-gnu)
 
 PLATFORMS
   x86_64-linux-gnu
 
 DEPENDENCIES
+  bubbles (~> 0.1.1)
   bubbletea (~> 0.1.3)
 
 CHECKSUMS
+  bubbles (0.1.1)
   bubbletea (0.1.3-x86_64-linux-gnu)
+  harmonica (0.1.1)
   lipgloss (0.2.2-x86_64-linux-gnu)
 
 BUNDLED WITH
