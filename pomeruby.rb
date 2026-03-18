@@ -14,6 +14,8 @@ class Pomeruby
     @timer_started = false
     @timer_paused  = false
 
+    @term_width = `tput cols`.to_i
+
     @text_bold =
       Lipgloss::Style.new
         .bold(true)
@@ -48,6 +50,10 @@ class Pomeruby
 
         [self, @timer.toggle]
       end
+    when Bubbletea::WindowSizeMessage
+      @term_width = message.width
+
+      [self, nil]
     when Bubbles::Timer::TickMessage, Bubbles::Timer::StartStopMessage
       if @timer_started
         @timer, command = @timer.update(message)
@@ -73,24 +79,24 @@ class Pomeruby
       end
 
     lines = []
-    lines << place_centered(80, 0, @text_bold.render('Pomeruby'))
+    lines << place_centered(@term_width, 0, @text_bold.render('Pomeruby'))
     lines << ''
     lines << ''
-    lines << place_centered(80, 0, timer)
+    lines << place_centered(@term_width, 0, timer)
     lines <<
       if @timer_paused
-        place_centered(80, 0, '(paused)')
+        place_centered(@term_width, 0, '(paused)')
       else
-        place_centered(80, 0, '')
+        place_centered(@term_width, 0, '')
       end
     lines << ''
     lines <<
       if @timer_started
-        place_centered(80, 0, @text_italic.render('Press space to toggle'))
+        place_centered(@term_width, 0, @text_italic.render('Press space to toggle'))
       else
-        place_centered(80, 0, @text_italic.render('Press s to start'))
+        place_centered(@term_width, 0, @text_italic.render('Press s to start'))
       end
-    lines << place_centered(80, 0, @text_italic.render('Press q to quit'))
+    lines << place_centered(@term_width, 0, @text_italic.render('Press q to quit'))
     lines.join("\n")
   end
 
