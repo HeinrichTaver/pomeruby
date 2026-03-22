@@ -14,6 +14,7 @@ This tool is my own interpretation of the book, and an expansion on the ideas pr
 ## Tech Stack
 
 - [Ruby](https://www.ruby-lang.org)
+- [SQLite](https://sqlite.org)
 - [Mise](https://mise.jdx.dev)
 
 
@@ -38,3 +39,4 @@ mise x -- ruby pomeruby.rb
 This utility makes use of the following open-source libraries:
 
 - [Charm Ruby](https://github.com/stars/marcoroth/lists/charm-ruby)
+- [Ruby Interface for SQLite3](https://github.com/sparklemotion/sqlite3-ruby)

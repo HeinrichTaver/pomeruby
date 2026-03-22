@@ -1,6 +1,17 @@
 require 'bubbles'
 require 'bubbletea'
 require 'lipgloss'
+require 'sqlite3'
+
+XDG_DATA_HOME = ENV['XDG_DATA_HOME'] || File.expand_path('~/.local/share')
+
+POMERUBY_DATA = "#{XDG_DATA_HOME}/pomeruby"
+
+def create_database
+  Dir.mkdir(POMERUBY_DATA) unless Dir.exist?(POMERUBY_DATA)
+
+  SQLite3::Database.new("#{POMERUBY_DATA}/inventory.db")
+end
 
 class Pomeruby
   POMO_BLOCK_IN_MINUTES      = 60 * 25
@@ -22,6 +33,8 @@ class Pomeruby
     @text_italic =
       Lipgloss::Style.new
         .italic(true)
+
+    @db = create_database
   end
 
   def init
