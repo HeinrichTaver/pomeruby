@@ -6,11 +6,12 @@ require 'sqlite3'
 XDG_DATA_HOME = ENV['XDG_DATA_HOME'] || File.expand_path('~/.local/share')
 
 POMERUBY_DATA = "#{XDG_DATA_HOME}/pomeruby"
+POMERUBY_DB   = "#{POMERUBY_DATA}/inventory.db"
 
-def create_database
+def open_database
   Dir.mkdir(POMERUBY_DATA) unless Dir.exist?(POMERUBY_DATA)
 
-  SQLite3::Database.new("#{POMERUBY_DATA}/inventory.db")
+  SQLite3::Database.new("#{POMERUBY_DB}")
 end
 
 class Pomeruby
@@ -34,7 +35,7 @@ class Pomeruby
       Lipgloss::Style.new
         .italic(true)
 
-    @db = create_database
+    @db = open_database
   end
 
   def init
