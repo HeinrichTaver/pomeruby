@@ -26,6 +26,8 @@ class Pomeruby
     @timer_started = false
     @timer_paused  = false
 
+    @task_blocks = ""
+
     @term_width = `tput cols`.to_i
 
     @text_bold =
@@ -76,6 +78,9 @@ class Pomeruby
       else
         [self, nil]
       end
+    when Bubbles::Timer::TimeoutMessage
+      @task_blocks += "x"
+      [self, nil]
     else
       [self, nil]
     end
@@ -94,7 +99,12 @@ class Pomeruby
 
     lines = []
     lines << place_centered(@term_width, 0, @text_bold.render('Pomeruby'))
-    lines << ''
+    lines <<
+      if !@task_blocks.empty?
+        place_centered(@term_width, 0, "Blocks completed: #{@task_blocks}")
+      else
+        ''
+      end
     lines << ''
     lines << place_centered(@term_width, 0, timer)
     lines <<
