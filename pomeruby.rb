@@ -51,34 +51,29 @@ class Pomeruby
       when 'q', 'ctrl+c'
         [self, Bubbletea.quit]
       when 's'
-        if !@timer.running? && !@timer_started
+        unless @timer_started
           @timer         = Bubbles::Timer.new(POMO_BLOCK_IN_MINUTES)
           @timer_started = true
 
           [self, @timer.init]
         end
       when ' ', 'space'
-        if @timer_started && @timer.running?
-          @timer_paused = true
-        else
-          @timer_paused = false
+        if @timer_started
+          @timer_paused = @timer.running?
+          [self, @timer.toggle]
         end
-
-        [self, @timer.toggle]
       end
     when Bubbletea::WindowSizeMessage
       @term_width = message.width
 
       [self, nil]
     when Bubbles::Timer::TickMessage, Bubbles::Timer::StartStopMessage
-      if @timer_started
-        @timer, command = @timer.update(message)
+      return [self, nil] unless @timer_started
 
-        [self, command]
-      else
-        [self, nil]
-      end
+      @timer, command = @timer.update(message)
+      [self, command]
     when Bubbles::Timer::TimeoutMessage
+      @timer_started = false
       @task_blocks += "x"
       [self, nil]
     else
@@ -89,7 +84,6 @@ class Pomeruby
   def view
     timer =
       if @timer.timed_out?
-        @timer_started = false
         @text_bold.render("Block's up. Pause, now.")
       elsif @timer_started
         @timer.view
@@ -100,7 +94,7 @@ class Pomeruby
     lines = []
     lines << place_centered(@term_width, 0, @text_bold.render('Pomeruby'))
     lines <<
-      if !@task_blocks.empty?
+      unless @task_blocks.empty?
         place_centered(@term_width, 0, "Blocks completed: #{@task_blocks}")
       else
         ''
