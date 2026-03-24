@@ -8,12 +8,6 @@ XDG_DATA_HOME = ENV['XDG_DATA_HOME'] || File.expand_path('~/.local/share')
 POMERUBY_DATA = "#{XDG_DATA_HOME}/pomeruby"
 POMERUBY_DB   = "#{POMERUBY_DATA}/inventory.db"
 
-def open_database
-  Dir.mkdir(POMERUBY_DATA) unless Dir.exist?(POMERUBY_DATA)
-
-  SQLite3::Database.new("#{POMERUBY_DB}")
-end
-
 class Pomeruby
   POMO_BLOCK_IN_MINUTES      = 60 * 25
   POMO_PAUSE_IN_MINUTES      = 60 * 5
@@ -37,7 +31,7 @@ class Pomeruby
       Lipgloss::Style.new
         .italic(true)
 
-    @db = open_database
+    @db = database_open
   end
 
   def init
@@ -119,8 +113,45 @@ class Pomeruby
   end
 
   private
+
   def place_centered(width, height, text)
     Lipgloss.place(width, height, :center, :center, text)
+  end
+
+  def database_create
+    SQLite3::Database.new("#{POMERUBY_DB}") do |db|
+      db.foreign_keys = "ON"
+      db.execute <<-SQL
+        CREATE TABLE tasks
+          ( id          INTEGER PRIMARY KEY
+          , created_at  TEXT    DEFAULT CURRENT_TIMESTAMP NOT NULL
+          , updated_at  TEXT    DEFAULT CURRENT_TIMESTAMP NOT NULL
+          , description TEXT    UNIQUE                    NOT NULL
+          , status      TEXT    DEFAULT 'open'            NOT NULL
+                        CHECK(status IN ('open', 'in_progress', 'done'))
+          , blocks_est  INTEGER
+          , blocks_act  TEXT
+          );
+SQL
+
+      db.execute <<-SQL
+        CREATE TRIGGER update_tasks_updated_at
+        AFTER UPDATE ON tasks
+        BEGIN
+           UPDATE tasks
+              SET updated_at = CURRENT_TIMESTAMP
+            WHERE id = OLD.id;
+        END;
+SQL
+    end
+  end
+
+  def database_open
+    Dir.mkdir(POMERUBY_DATA) unless Dir.exist?(POMERUBY_DATA)
+
+    database_create unless File.exist?(POMERUBY_DB)
+
+    SQLite3::Database.new("#{POMERUBY_DB}")
   end
 end
 
