@@ -1,5 +1,7 @@
-gem "bubbletea", "~> 0.1.3"
+# frozen_string_literal: true
 
-gem "bubbles", "~> 0.1.1"
+gem 'bubbletea', '~> 0.1.3'
 
-gem "sqlite3", "~> 2.9"
+gem 'bubbles', '~> 0.1.1'
+
+gem 'sqlite3', '~> 2.9'
