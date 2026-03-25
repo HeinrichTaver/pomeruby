@@ -5,7 +5,8 @@ require 'io/console'
 require 'bubbles'
 require 'bubbletea'
 require 'lipgloss'
-require 'sqlite3'
+
+require_relative "pomeruby/database"
 
 XDG_DATA_HOME = ENV['XDG_DATA_HOME'] || File.expand_path('~/.local/share')
 
@@ -35,7 +36,7 @@ class Pomeruby
       Lipgloss::Style.new
         .italic(true)
 
-    @db = database_open
+    @db = Database.open(POMERUBY_DB)
 
     @menu_items = [
       { title: 'Timer', option: 'timer' },
@@ -253,42 +254,6 @@ class Pomeruby
     input.placeholder = placeholder
 
     input
-  end
-
-  def database_create
-    SQLite3::Database.new(POMERUBY_DB) do |db|
-      db.foreign_keys = 'ON'
-      db.execute <<-SQL
-        CREATE TABLE tasks
-          ( id          INTEGER PRIMARY KEY
-          , created_at  TEXT    DEFAULT CURRENT_TIMESTAMP NOT NULL
-          , updated_at  TEXT    DEFAULT CURRENT_TIMESTAMP NOT NULL
-          , description TEXT    UNIQUE                    NOT NULL
-          , status      TEXT    DEFAULT 'open'            NOT NULL
-                        CHECK(status IN ('open', 'in_progress', 'done'))
-          , blocks_est  INTEGER
-          , blocks_act  TEXT
-          );
-      SQL
-
-      db.execute <<-SQL
-        CREATE TRIGGER update_tasks_updated_at
-        AFTER UPDATE ON tasks
-        BEGIN
-           UPDATE tasks
-              SET updated_at = CURRENT_TIMESTAMP
-            WHERE id = OLD.id;
-        END;
-      SQL
-    end
-  end
-
-  def database_open
-    Dir.mkdir(POMERUBY_DATA) unless Dir.exist?(POMERUBY_DATA)
-
-    database_create unless File.exist?(POMERUBY_DB)
-
-    SQLite3::Database.new(POMERUBY_DB)
   end
 end
 

@@ -8,5 +8,5 @@
 !exe
 !exe/*
 !lib
-!lib/*
+!lib/**
 !mise.toml

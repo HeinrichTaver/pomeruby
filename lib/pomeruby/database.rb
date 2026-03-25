@@ -1,0 +1,43 @@
+# frozen_string_literal: true
+
+require 'sqlite3'
+
+module Database
+  module_function
+
+  def create(database)
+    SQLite3::Database.new(database) do |db|
+      db.foreign_keys = 'ON'
+      db.execute <<-SQL
+        CREATE TABLE tasks
+          ( id          INTEGER PRIMARY KEY
+          , created_at  TEXT    DEFAULT CURRENT_TIMESTAMP NOT NULL
+          , updated_at  TEXT    DEFAULT CURRENT_TIMESTAMP NOT NULL
+          , description TEXT    UNIQUE                    NOT NULL
+          , status      TEXT    DEFAULT 'open'            NOT NULL
+                        CHECK(status IN ('open', 'in_progress', 'done'))
+          , blocks_est  INTEGER
+          , blocks_act  TEXT
+          );
+      SQL
+
+      db.execute <<-SQL
+        CREATE TRIGGER update_tasks_updated_at
+        AFTER UPDATE ON tasks
+        BEGIN
+           UPDATE tasks
+              SET updated_at = CURRENT_TIMESTAMP
+            WHERE id = OLD.id;
+        END;
+      SQL
+    end
+  end
+
+  def open(database)
+    Dir.mkdir(File.dirname(database)) unless Dir.exist?(File.dirname(database))
+
+    create database unless File.exist?(database)
+
+    SQLite3::Database.new(database)
+  end
+end
