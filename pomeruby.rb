@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'io/console'
+
 require 'bubbles'
 require 'bubbletea'
 require 'lipgloss'
@@ -24,7 +26,7 @@ class Pomeruby
 
     @task_blocks = ''
 
-    @term_width = `tput cols`.to_i
+    _, @term_width = IO.console.winsize
 
     @text_bold =
       Lipgloss::Style.new
