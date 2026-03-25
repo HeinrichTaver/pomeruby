@@ -56,23 +56,12 @@ class Pomeruby
     case message
     when Bubbletea::KeyMessage
       return update_menu_keys(message) if @current_view == 'menu'
+      return update_timer_keys(message) if @current_view == 'timer'
 
       case message.to_s
       when 'q', 'ctrl+c'
         unless message.to_s == 'q' && @current_view == 'tasks' && @task_submitted == false
           return [self, Bubbletea.quit]
-        end
-      when 's'
-        unless @timer_started
-          @timer         = Bubbles::Timer.new(Config::POMO_BLOCK_IN_MINUTES)
-          @timer_started = true
-
-          return [self, @timer.init]
-        end
-      when ' ', 'space'
-        if @timer_started
-          @timer_paused = @timer.running?
-          return [self, @timer.toggle]
         end
       when 'enter'
         if @task_input_focused < @task_inputs.length - 1
@@ -140,6 +129,29 @@ class Pomeruby
     end
   end
 
+  def update_timer_keys(message)
+    case message.to_s
+    when 'ctrl+c'
+      [self, Bubbletea.quit]
+    when 'q'
+      [self, Bubbletea.quit] unless @timer.running?
+    when 's'
+      unless @timer_started
+        @timer         = Bubbles::Timer.new(Config::POMO_BLOCK_IN_MINUTES)
+        @timer_started = true
+        [self, @timer.init]
+      end
+    when ' ', 'space'
+      if @timer_started
+        @timer_paused = @timer.running?
+        [self, @timer.toggle]
+      end
+    when 'esc'
+      @current_view = 'menu' unless @timer.running?
+      [self, nil]
+    end
+  end
+
   def view
     case @current_view
     when 'menu'
@@ -199,7 +211,7 @@ class Pomeruby
       if @timer_paused
         place_centered(@term_width, 0, text_italic('space toggle | esc menu | q quit'))
       elsif @timer_started
-        place_centered(@term_width, 0, text_italic('space toggle | q quit'))
+        place_centered(@term_width, 0, text_italic('space toggle'))
       else
         place_centered(@term_width, 0, text_italic('s start | esc menu | q quit'))
       end
