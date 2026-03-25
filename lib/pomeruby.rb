@@ -15,6 +15,10 @@ class Pomeruby
   include Bubbletea::Model
 
   def initialize
+    @db = Database.open(Config::POMERUBY_DB)
+
+    @current_view = 'menu'
+
     @timer         = Bubbles::Timer.new(Config::POMO_BLOCK_IN_MINUTES)
     @timer_started = false
     @timer_paused  = false
@@ -22,8 +26,6 @@ class Pomeruby
     @task_blocks = ''
 
     _, @term_width = IO.console.winsize
-
-    @db = Database.open(Config::POMERUBY_DB)
 
     @menu_items = [
       { title: 'Timer', option: 'timer' },
@@ -36,8 +38,6 @@ class Pomeruby
     @menu.show_filter     = false
     @menu.show_pagination = false
     @menu.show_status_bar = false
-
-    @menu_selected = nil
 
     @task_inputs = [
       create_input('Task', 'Task description'),
@@ -57,7 +57,7 @@ class Pomeruby
     when Bubbletea::KeyMessage
       case message.to_s
       when 'q', 'ctrl+c'
-        unless message.to_s == 'q' && @menu_selected == 'tasks' && @task_submitted == false
+        unless message.to_s == 'q' && @current_view == 'tasks' && @task_submitted == false
           return [self, Bubbletea.quit]
         end
       when 's'
@@ -73,7 +73,7 @@ class Pomeruby
           return [self, @timer.toggle]
         end
       when 'enter'
-        if @menu_selected == 'tasks'
+        if @current_view == 'tasks'
           if @task_input_focused < @task_inputs.length - 1
             @task_inputs[@task_input_focused].blur
             @task_input_focused += 1 if @task_input_focused + 1 < @task_inputs.length
@@ -86,14 +86,14 @@ class Pomeruby
             return [self, nil]
           end
         else
-          @menu_selected = @menu.selected_item[:option]
+          @current_view = @menu.selected_item[:option]
 
           @menu, command = @menu.update(message)
 
           return [self, command]
         end
       when 'tab', 'down'
-        if @menu_selected == 'tasks'
+        if @current_view == 'tasks'
           @task_inputs[@task_input_focused].blur
           @task_input_focused += 1 if @task_input_focused + 1 < @task_inputs.length
           command = @task_inputs[@task_input_focused].focus
@@ -104,7 +104,7 @@ class Pomeruby
         @menu, command = @menu.update(message)
         return [self, command]
       when 'shift+tab', 'up'
-        if @menu_selected == 'tasks'
+        if @current_view == 'tasks'
           @task_inputs[@task_input_focused].blur
           @task_input_focused -= 1 if @task_input_focused - 1 >= 0
           command = @task_inputs[@task_input_focused].focus
@@ -115,7 +115,7 @@ class Pomeruby
         @menu, command = @menu.update(message)
         return [self, command]
       when 'esc'
-        @menu_selected = nil unless @timer.running?
+        @current_view = 'menu' unless @timer.running?
       end
     when Bubbletea::WindowSizeMessage
       @term_width = message.width
@@ -136,22 +136,22 @@ class Pomeruby
 
     @task_inputs[@task_input_focused], command = @task_inputs[@task_input_focused].update(message)
 
-    return if @menu_selected
+    return if @current_view != 'menu'
 
     @menu, command = @menu.update(message)
     [self, command]
   end
 
   def view
-    return view_menu unless @menu_selected
-
-    case @menu_selected
+    case @current_view
+    when 'menu'
+      view_menu
     when 'timer'
       view_timer
     when 'tasks'
       view_tasks
     else
-      raise "view #{@menu_selected} doesn't exist"
+      raise "view #{@current_view} doesn't exist"
     end
   end
 
