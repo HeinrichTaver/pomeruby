@@ -8,8 +8,10 @@ require 'lipgloss'
 
 require_relative "pomeruby/config"
 require_relative "pomeruby/database"
+require_relative "pomeruby/helpers"
 
 class Pomeruby
+  include Helpers
   include Bubbletea::Model
 
   def initialize
@@ -20,13 +22,6 @@ class Pomeruby
     @task_blocks = ''
 
     _, @term_width = IO.console.winsize
-
-    @text_bold =
-      Lipgloss::Style.new
-        .bold(true)
-    @text_italic =
-      Lipgloss::Style.new
-        .italic(true)
 
     @db = Database.open(Config::POMERUBY_DB)
 
@@ -164,20 +159,20 @@ class Pomeruby
 
   def view_menu
     lines = []
-    lines << place_centered(@term_width, 0, @text_bold.render('Pomeruby'))
+    lines << place_centered(@term_width, 0, text_bold('Pomeruby'))
     lines << ''
     lines << ''
     lines << place_centered(@term_width, 0, @menu.view)
     lines << ''
     lines << ''
-    lines << place_centered(@term_width, 0, @text_italic.render('↑/↓ navigate | enter select | q quit'))
+    lines << place_centered(@term_width, 0, text_italic('↑/↓ navigate | enter select | q quit'))
     lines.join("\n")
   end
 
   def view_timer
     timer =
       if @timer.timed_out?
-        @text_bold.render("Block's up. Pause, now.")
+        text_bold("Block's up. Pause, now.")
       elsif @timer_started
         @timer.view
       else
@@ -185,7 +180,7 @@ class Pomeruby
       end
 
     lines = []
-    lines << place_centered(@term_width, 0, @text_bold.render('Pomeruby'))
+    lines << place_centered(@term_width, 0, text_bold('Pomeruby'))
     lines <<
       if @task_blocks.empty?
         ''
@@ -204,18 +199,18 @@ class Pomeruby
     lines << ''
     lines <<
       if @timer_paused
-        place_centered(@term_width, 0, @text_italic.render('space toggle | esc menu | q quit'))
+        place_centered(@term_width, 0, text_italic('space toggle | esc menu | q quit'))
       elsif @timer_started
-        place_centered(@term_width, 0, @text_italic.render('space toggle | q quit'))
+        place_centered(@term_width, 0, text_italic('space toggle | q quit'))
       else
-        place_centered(@term_width, 0, @text_italic.render('s start | esc menu | q quit'))
+        place_centered(@term_width, 0, text_italic('s start | esc menu | q quit'))
       end
     lines.join("\n")
   end
 
   def view_tasks
     lines = []
-    lines << place_centered(@term_width, 0, @text_bold.render('Pomeruby'))
+    lines << place_centered(@term_width, 0, text_bold('Pomeruby'))
     lines << ''
     lines << place_centered(@term_width, 0, 'Tasks, whither have ye gone?')
     lines << ''
@@ -232,12 +227,8 @@ class Pomeruby
       else
         ''
       end
-    lines << place_centered(@term_width, 0, @text_italic.render('esc menu | q quit'))
+    lines << place_centered(@term_width, 0, text_italic('esc menu | q quit'))
     lines.join("\n")
-  end
-
-  def place_centered(width, height, text)
-    Lipgloss.place(width, height, :center, :center, text)
   end
 
   def create_input(name, placeholder)
