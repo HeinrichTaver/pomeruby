@@ -32,6 +32,19 @@ class Pomeruby
         .italic(true)
 
     @db = database_open
+
+    @menu_items = [
+      { title: "Timer", option: "timer"},
+      { title: "Task List", option: "tasks"},
+    ].freeze
+
+    @menu                 = Bubbles::List.new(@menu_items)
+    @menu.fill_height     = false
+    @menu.show_title      = false
+    @menu.show_filter     = false
+    @menu.show_pagination = false
+    @menu.show_status_bar = false
+    @menu_selected        = nil
   end
 
   def init
@@ -43,39 +56,82 @@ class Pomeruby
     when Bubbletea::KeyMessage
       case message.to_s
       when 'q', 'ctrl+c'
-        [self, Bubbletea.quit]
+        return [self, Bubbletea.quit]
       when 's'
         unless @timer_started
           @timer         = Bubbles::Timer.new(POMO_BLOCK_IN_MINUTES)
           @timer_started = true
 
-          [self, @timer.init]
+          return [self, @timer.init]
         end
       when ' ', 'space'
         if @timer_started
           @timer_paused = @timer.running?
-          [self, @timer.toggle]
+          return [self, @timer.toggle]
+        end
+      when 'enter'
+        @menu_selected =  @menu.selected_item[:option]
+
+        @menu, command = @menu.update(message)
+
+        return [self, command]
+      when 'esc'
+        unless @timer.running?
+          @menu_selected = nil
         end
       end
     when Bubbletea::WindowSizeMessage
       @term_width = message.width
 
-      [self, nil]
+      return [self, nil]
     when Bubbles::Timer::TickMessage, Bubbles::Timer::StartStopMessage
       return [self, nil] unless @timer_started
 
       @timer, command = @timer.update(message)
-      [self, command]
+      return [self, command]
     when Bubbles::Timer::TimeoutMessage
       @timer_started = false
       @task_blocks += "x"
-      [self, nil]
+      return [self, nil]
     else
-      [self, nil]
+      return [self, nil]
+    end
+
+    unless @menu_selected
+      @menu, command = @menu.update(message)
+
+      [self, command]
     end
   end
 
   def view
+    return view_menu unless @menu_selected
+
+    case @menu_selected
+    when "timer"
+      view_timer
+    when "tasks"
+      view_tasks
+    else
+      raise "view #{@menu_selected} doesn't exist"
+    end
+  end
+
+  private
+
+  def view_menu
+    lines = []
+    lines << place_centered(@term_width, 0, @text_bold.render('Pomeruby'))
+    lines << ''
+    lines << ''
+    lines << place_centered(@term_width, 0, @menu.view)
+    lines << ''
+    lines << ''
+    lines << place_centered(@term_width, 0, @text_italic.render('↑/↓ navigate | enter select | q quit'))
+    lines.join("\n")
+  end
+
+  def view_timer
     timer =
       if @timer.timed_out?
         @text_bold.render("Block's up. Pause, now.")
@@ -102,17 +158,30 @@ class Pomeruby
         place_centered(@term_width, 0, '')
       end
     lines << ''
+    lines << ''
     lines <<
-      if @timer_started
-        place_centered(@term_width, 0, @text_italic.render('Press space to toggle'))
+      if @timer_paused
+        place_centered(@term_width, 0, @text_italic.render('space toggle | esc menu | q quit'))
+      elsif @timer_started
+        place_centered(@term_width, 0, @text_italic.render('space toggle | q quit'))
       else
-        place_centered(@term_width, 0, @text_italic.render('Press s to start'))
+        place_centered(@term_width, 0, @text_italic.render('s start | esc menu | q quit'))
       end
-    lines << place_centered(@term_width, 0, @text_italic.render('Press q to quit'))
     lines.join("\n")
   end
 
-  private
+  def view_tasks
+    lines = []
+    lines << place_centered(@term_width, 0, @text_bold.render('Pomeruby'))
+    lines << ''
+    lines << ''
+    lines << place_centered(@term_width, 0, 'Tasks, whither have ye gone?')
+    lines << ''
+    lines << ''
+    lines << ''
+    lines << place_centered(@term_width, 0, @text_italic.render('esc menu | q quit'))
+    lines.join("\n")
+  end
 
   def place_centered(width, height, text)
     Lipgloss.place(width, height, :center, :center, text)
