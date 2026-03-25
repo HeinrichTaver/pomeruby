@@ -5,5 +5,8 @@
 !Gemfile.lock
 !LICENSE
 !README.md
+!exe
+!exe/*
+!lib
+!lib/*
 !mise.toml
-!pomeruby.rb
