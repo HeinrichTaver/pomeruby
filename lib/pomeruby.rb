@@ -4,7 +4,6 @@ require 'io/console'
 
 require 'bubbles'
 require 'bubbletea'
-require 'lipgloss'
 
 require_relative "pomeruby/config"
 require_relative "pomeruby/database"
