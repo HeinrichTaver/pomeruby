@@ -6,22 +6,14 @@ require 'bubbles'
 require 'bubbletea'
 require 'lipgloss'
 
+require_relative "pomeruby/config"
 require_relative "pomeruby/database"
 
-XDG_DATA_HOME = ENV['XDG_DATA_HOME'] || File.expand_path('~/.local/share')
-
-POMERUBY_DATA = "#{XDG_DATA_HOME}/pomeruby"
-POMERUBY_DB   = "#{POMERUBY_DATA}/inventory.db"
-
 class Pomeruby
-  POMO_BLOCK_IN_MINUTES      = 60 * 25
-  POMO_PAUSE_IN_MINUTES      = 60 * 5
-  POMO_PAUSE_LONG_IN_MINUTES = 60 * 30
-
   include Bubbletea::Model
 
   def initialize
-    @timer         = Bubbles::Timer.new(POMO_BLOCK_IN_MINUTES)
+    @timer         = Bubbles::Timer.new(Config::POMO_BLOCK_IN_MINUTES)
     @timer_started = false
     @timer_paused  = false
 
@@ -36,7 +28,7 @@ class Pomeruby
       Lipgloss::Style.new
         .italic(true)
 
-    @db = Database.open(POMERUBY_DB)
+    @db = Database.open(Config::POMERUBY_DB)
 
     @menu_items = [
       { title: 'Timer', option: 'timer' },
@@ -75,7 +67,7 @@ class Pomeruby
         end
       when 's'
         unless @timer_started
-          @timer         = Bubbles::Timer.new(POMO_BLOCK_IN_MINUTES)
+          @timer         = Bubbles::Timer.new(Config::POMO_BLOCK_IN_MINUTES)
           @timer_started = true
 
           return [self, @timer.init]
