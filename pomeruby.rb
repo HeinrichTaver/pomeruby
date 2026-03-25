@@ -50,6 +50,14 @@ class Pomeruby
     @menu.show_status_bar = false
 
     @menu_selected = nil
+
+    @task_inputs = [
+      create_input('Task', 'Task description'),
+      create_input('Estimation', '(Optional) How many blocks will it take'),
+    ]
+
+    @task_input_focused = 0
+    @task_submitted = false
   end
 
   def init
@@ -61,7 +69,9 @@ class Pomeruby
     when Bubbletea::KeyMessage
       case message.to_s
       when 'q', 'ctrl+c'
-        return [self, Bubbletea.quit]
+        unless message.to_s == 'q' && @menu_selected == 'tasks' && @task_submitted == false
+          return [self, Bubbletea.quit]
+        end
       when 's'
         unless @timer_started
           @timer         = Bubbles::Timer.new(POMO_BLOCK_IN_MINUTES)
@@ -75,10 +85,46 @@ class Pomeruby
           return [self, @timer.toggle]
         end
       when 'enter'
-        @menu_selected = @menu.selected_item[:option]
+        if @menu_selected == 'tasks'
+          if @task_input_focused < @task_inputs.length - 1
+            @task_inputs[@task_input_focused].blur
+            @task_input_focused += 1 if @task_input_focused + 1 < @task_inputs.length
+            command = @task_inputs[@task_input_focused].focus
+
+            return [self, command]
+          else
+            @task_submitted = true unless @task_inputs[0].value.empty?
+
+            return [self, nil]
+          end
+        else
+          @menu_selected = @menu.selected_item[:option]
+
+          @menu, command = @menu.update(message)
+
+          return [self, command]
+        end
+      when 'tab', 'down'
+        if @menu_selected == 'tasks'
+          @task_inputs[@task_input_focused].blur
+          @task_input_focused += 1 if @task_input_focused + 1 < @task_inputs.length
+          command = @task_inputs[@task_input_focused].focus
+
+          return [self, command]
+        end
 
         @menu, command = @menu.update(message)
+        return [self, command]
+      when 'shift+tab', 'up'
+        if @menu_selected == 'tasks'
+          @task_inputs[@task_input_focused].blur
+          @task_input_focused -= 1 if @task_input_focused - 1 >= 0
+          command = @task_inputs[@task_input_focused].focus
 
+          return [self, command]
+        end
+
+        @menu, command = @menu.update(message)
         return [self, command]
       when 'esc'
         @menu_selected = nil unless @timer.running?
@@ -99,6 +145,8 @@ class Pomeruby
     else
       return [self, nil]
     end
+
+    @task_inputs[@task_input_focused], command = @task_inputs[@task_input_focused].update(message)
 
     return if @menu_selected
 
@@ -176,17 +224,35 @@ class Pomeruby
     lines = []
     lines << place_centered(@term_width, 0, @text_bold.render('Pomeruby'))
     lines << ''
-    lines << ''
     lines << place_centered(@term_width, 0, 'Tasks, whither have ye gone?')
     lines << ''
-    lines << ''
-    lines << ''
+
+    @task_inputs.each_with_index do |input, i|
+      label = ['Task:', 'Estimation:'][i]
+      @task_inputs[@task_input_focused].focus if i == 0
+      lines << "#{'%-11s' % label} #{input.view}"
+    end
+
+    lines <<
+      if @task_submitted
+        'Submitted'
+      else
+        ''
+      end
     lines << place_centered(@term_width, 0, @text_italic.render('esc menu | q quit'))
     lines.join("\n")
   end
 
   def place_centered(width, height, text)
     Lipgloss.place(width, height, :center, :center, text)
+  end
+
+  def create_input(name, placeholder)
+    input = Bubbles::TextInput.new
+    input.prompt = ""
+    input.placeholder = placeholder
+
+    input
   end
 
   def database_create
