@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'bubbles'
 require 'bubbletea'
 require 'lipgloss'
@@ -20,7 +22,7 @@ class Pomeruby
     @timer_started = false
     @timer_paused  = false
 
-    @task_blocks = ""
+    @task_blocks = ''
 
     @term_width = `tput cols`.to_i
 
@@ -34,8 +36,8 @@ class Pomeruby
     @db = database_open
 
     @menu_items = [
-      { title: "Timer", option: "timer"},
-      { title: "Task List", option: "tasks"},
+      { title: 'Timer', option: 'timer' },
+      { title: 'Task List', option: 'tasks' },
     ].freeze
 
     @menu                 = Bubbles::List.new(@menu_items)
@@ -44,7 +46,8 @@ class Pomeruby
     @menu.show_filter     = false
     @menu.show_pagination = false
     @menu.show_status_bar = false
-    @menu_selected        = nil
+
+    @menu_selected = nil
   end
 
   def init
@@ -70,15 +73,13 @@ class Pomeruby
           return [self, @timer.toggle]
         end
       when 'enter'
-        @menu_selected =  @menu.selected_item[:option]
+        @menu_selected = @menu.selected_item[:option]
 
         @menu, command = @menu.update(message)
 
         return [self, command]
       when 'esc'
-        unless @timer.running?
-          @menu_selected = nil
-        end
+        @menu_selected = nil unless @timer.running?
       end
     when Bubbletea::WindowSizeMessage
       @term_width = message.width
@@ -91,26 +92,25 @@ class Pomeruby
       return [self, command]
     when Bubbles::Timer::TimeoutMessage
       @timer_started = false
-      @task_blocks += "x"
+      @task_blocks += 'x'
       return [self, nil]
     else
       return [self, nil]
     end
 
-    unless @menu_selected
-      @menu, command = @menu.update(message)
+    return if @menu_selected
 
-      [self, command]
-    end
+    @menu, command = @menu.update(message)
+    [self, command]
   end
 
   def view
     return view_menu unless @menu_selected
 
     case @menu_selected
-    when "timer"
+    when 'timer'
       view_timer
-    when "tasks"
+    when 'tasks'
       view_tasks
     else
       raise "view #{@menu_selected} doesn't exist"
@@ -144,10 +144,10 @@ class Pomeruby
     lines = []
     lines << place_centered(@term_width, 0, @text_bold.render('Pomeruby'))
     lines <<
-      unless @task_blocks.empty?
-        place_centered(@term_width, 0, "Blocks completed: #{@task_blocks}")
-      else
+      if @task_blocks.empty?
         ''
+      else
+        place_centered(@term_width, 0, "Blocks completed: #{@task_blocks}")
       end
     lines << ''
     lines << place_centered(@term_width, 0, timer)
@@ -188,8 +188,8 @@ class Pomeruby
   end
 
   def database_create
-    SQLite3::Database.new("#{POMERUBY_DB}") do |db|
-      db.foreign_keys = "ON"
+    SQLite3::Database.new(POMERUBY_DB) do |db|
+      db.foreign_keys = 'ON'
       db.execute <<-SQL
         CREATE TABLE tasks
           ( id          INTEGER PRIMARY KEY
@@ -201,7 +201,7 @@ class Pomeruby
           , blocks_est  INTEGER
           , blocks_act  TEXT
           );
-SQL
+      SQL
 
       db.execute <<-SQL
         CREATE TRIGGER update_tasks_updated_at
@@ -211,7 +211,7 @@ SQL
               SET updated_at = CURRENT_TIMESTAMP
             WHERE id = OLD.id;
         END;
-SQL
+      SQL
     end
   end
 
@@ -220,7 +220,7 @@ SQL
 
     database_create unless File.exist?(POMERUBY_DB)
 
-    SQLite3::Database.new("#{POMERUBY_DB}")
+    SQLite3::Database.new(POMERUBY_DB)
   end
 end
 
