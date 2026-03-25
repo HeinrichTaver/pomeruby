@@ -55,6 +55,8 @@ class Pomeruby
   def update(message)
     case message
     when Bubbletea::KeyMessage
+      return update_menu_keys(message) if @current_view == 'menu'
+
       case message.to_s
       when 'q', 'ctrl+c'
         unless message.to_s == 'q' && @current_view == 'tasks' && @task_submitted == false
@@ -73,46 +75,28 @@ class Pomeruby
           return [self, @timer.toggle]
         end
       when 'enter'
-        if @current_view == 'tasks'
-          if @task_input_focused < @task_inputs.length - 1
-            @task_inputs[@task_input_focused].blur
-            @task_input_focused += 1 if @task_input_focused + 1 < @task_inputs.length
-            command = @task_inputs[@task_input_focused].focus
-
-            return [self, command]
-          else
-            @task_submitted = true unless @task_inputs[0].value.empty?
-
-            return [self, nil]
-          end
-        else
-          @current_view = @menu.selected_item[:option]
-
-          @menu, command = @menu.update(message)
-
-          return [self, command]
-        end
-      when 'tab', 'down'
-        if @current_view == 'tasks'
+        if @task_input_focused < @task_inputs.length - 1
           @task_inputs[@task_input_focused].blur
           @task_input_focused += 1 if @task_input_focused + 1 < @task_inputs.length
           command = @task_inputs[@task_input_focused].focus
 
           return [self, command]
-        end
+        else
+          @task_submitted = true unless @task_inputs[0].value.empty?
 
-        @menu, command = @menu.update(message)
+          return [self, nil]
+        end
+      when 'tab', 'down'
+        @task_inputs[@task_input_focused].blur
+        @task_input_focused += 1 if @task_input_focused + 1 < @task_inputs.length
+        command = @task_inputs[@task_input_focused].focus
+
         return [self, command]
       when 'shift+tab', 'up'
-        if @current_view == 'tasks'
-          @task_inputs[@task_input_focused].blur
-          @task_input_focused -= 1 if @task_input_focused - 1 >= 0
-          command = @task_inputs[@task_input_focused].focus
+        @task_inputs[@task_input_focused].blur
+        @task_input_focused -= 1 if @task_input_focused - 1 >= 0
+        command = @task_inputs[@task_input_focused].focus
 
-          return [self, command]
-        end
-
-        @menu, command = @menu.update(message)
         return [self, command]
       when 'esc'
         @current_view = 'menu' unless @timer.running?
@@ -140,6 +124,20 @@ class Pomeruby
 
     @menu, command = @menu.update(message)
     [self, command]
+  end
+
+  def update_menu_keys(message)
+    case message.to_s
+    when 'q', 'ctrl+c'
+      [self, Bubbletea.quit]
+    when 'enter'
+      @current_view = @menu.selected_item[:option]
+      @menu, command = @menu.update(message)
+      [self, command]
+    else
+      @menu, command = @menu.update(message)
+      [self, command]
+    end
   end
 
   def view
