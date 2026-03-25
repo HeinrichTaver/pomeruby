@@ -55,64 +55,28 @@ class Pomeruby
   def update(message)
     case message
     when Bubbletea::KeyMessage
-      return update_menu_keys(message) if @current_view == 'menu'
-      return update_timer_keys(message) if @current_view == 'timer'
-
-      case message.to_s
-      when 'q', 'ctrl+c'
-        unless message.to_s == 'q' && @current_view == 'tasks' && @task_submitted == false
-          return [self, Bubbletea.quit]
-        end
-      when 'enter'
-        if @task_input_focused < @task_inputs.length - 1
-          @task_inputs[@task_input_focused].blur
-          @task_input_focused += 1 if @task_input_focused + 1 < @task_inputs.length
-          command = @task_inputs[@task_input_focused].focus
-
-          return [self, command]
-        else
-          @task_submitted = true unless @task_inputs[0].value.empty?
-
-          return [self, nil]
-        end
-      when 'tab', 'down'
-        @task_inputs[@task_input_focused].blur
-        @task_input_focused += 1 if @task_input_focused + 1 < @task_inputs.length
-        command = @task_inputs[@task_input_focused].focus
-
-        return [self, command]
-      when 'shift+tab', 'up'
-        @task_inputs[@task_input_focused].blur
-        @task_input_focused -= 1 if @task_input_focused - 1 >= 0
-        command = @task_inputs[@task_input_focused].focus
-
-        return [self, command]
-      when 'esc'
-        @current_view = 'menu' unless @timer.running?
+      case @current_view
+      when 'menu'  then update_menu_keys(message)
+      when 'timer' then update_timer_keys(message)
+      when 'tasks' then update_tasks_keys(message)
       end
+
     when Bubbletea::WindowSizeMessage
       @term_width = message.width
 
-      return [self, nil]
+      [self, nil]
     when Bubbles::Timer::TickMessage, Bubbles::Timer::StartStopMessage
-      return [self, nil] unless @timer_started
+      [self, nil] unless @timer_started
 
       @timer, command = @timer.update(message)
-      return [self, command]
+      [self, command]
     when Bubbles::Timer::TimeoutMessage
       @timer_started = false
       @task_blocks += 'x'
-      return [self, nil]
+      [self, nil]
     else
-      return [self, nil]
+      [self, nil]
     end
-
-    @task_inputs[@task_input_focused], command = @task_inputs[@task_input_focused].update(message)
-
-    return if @current_view != 'menu'
-
-    @menu, command = @menu.update(message)
-    [self, command]
   end
 
   def update_menu_keys(message)
@@ -149,6 +113,45 @@ class Pomeruby
     when 'esc'
       @current_view = 'menu' unless @timer.running?
       [self, nil]
+    end
+  end
+
+  def update_tasks_keys(message)
+    case message.to_s
+    when 'ctrl+c'
+      [self, Bubbletea.quit]
+    when 'q'
+      [self, Bubbletea.quit] if @task_submitted
+    when 'enter'
+      if @task_input_focused < @task_inputs.length - 1
+        @task_inputs[@task_input_focused].blur
+        @task_input_focused += 1 if @task_input_focused + 1 < @task_inputs.length
+
+        command = @task_inputs[@task_input_focused].focus
+        [self, command]
+      else
+        @task_submitted = true unless @task_inputs[0].value.empty?
+        [self, nil]
+      end
+    when 'tab', 'down'
+      @task_inputs[@task_input_focused].blur
+      @task_input_focused += 1 if @task_input_focused + 1 < @task_inputs.length
+
+      command = @task_inputs[@task_input_focused].focus
+      [self, command]
+    when 'shift+tab', 'up'
+      @task_inputs[@task_input_focused].blur
+      @task_input_focused -= 1 if @task_input_focused - 1 >= 0
+
+      command = @task_inputs[@task_input_focused].focus
+      [self, command]
+    when 'esc'
+      @current_view = 'menu' unless @timer.running?
+      [self, nil]
+    else
+      @task_inputs[@task_input_focused], command = @task_inputs[@task_input_focused].update(message)
+      @menu, command = @menu.update(message)
+      [self, command]
     end
   end
 
@@ -237,7 +240,12 @@ class Pomeruby
       else
         ''
       end
-    lines << place_centered(@term_width, 0, text_italic('esc menu | q quit'))
+    lines <<
+      if @task_submitted
+        place_centered(@term_width, 0, text_italic('esc menu | q quit'))
+      else
+        place_centered(@term_width, 0, text_italic('esc menu'))
+      end
     lines.join("\n")
   end
 
