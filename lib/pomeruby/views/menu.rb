@@ -17,37 +17,35 @@ module Views
     module_function
 
     def init
-      menu                 = Bubbles::List.new(ITEMS)
-      menu.fill_height     = false
-      menu.show_title      = false
-      menu.show_filter     = false
-      menu.show_pagination = false
-      menu.show_status_bar = false
-
-      menu
+      @@menu                 = Bubbles::List.new(ITEMS)
+      @@menu.fill_height     = false
+      @@menu.show_title      = false
+      @@menu.show_filter     = false
+      @@menu.show_pagination = false
+      @@menu.show_status_bar = false
     end
 
-    def update(message, menu)
+    def update(message)
       case message.to_s
       when 'q', 'ctrl+c'
         [Bubbletea.quit, nil]
       when 'enter'
-        view = menu.selected_item[:option]
-        menu, command = menu.update(message)
+        view = @@menu.selected_item[:option]
+        @@menu, command = @@menu.update(message)
         [command, view]
       else
-        menu, command = menu.update(message)
+        @@menu, command = @@menu.update(message)
         [command, nil]
       end
     end
 
-    def view(width, content)
+    def view(width)
       lines = []
 
       lines << place_header(width)
       lines << ''
       lines << ''
-      lines << place_content(width, content.view)
+      lines << place_content(width, @@menu.view)
       lines << ''
       lines << ''
       lines << place_footer(width, '↑/↓ navigate | enter select | q quit')
