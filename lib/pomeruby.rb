@@ -19,6 +19,8 @@ class Pomeruby
 
     @current_view = 'menu'
 
+    @menu = Views::Menu.init
+
     @timer         = Bubbles::Timer.new(Config::POMO_BLOCK_IN_MINUTES)
     @timer_started = false
     @timer_paused  = false
@@ -26,18 +28,6 @@ class Pomeruby
     @task_blocks = ''
 
     _, @term_width = IO.console.winsize
-
-    @menu_items = [
-      { title: 'Timer', option: 'timer' },
-      { title: 'Task List', option: 'tasks' },
-    ].freeze
-
-    @menu                 = Bubbles::List.new(@menu_items)
-    @menu.fill_height     = false
-    @menu.show_title      = false
-    @menu.show_filter     = false
-    @menu.show_pagination = false
-    @menu.show_status_bar = false
 
     @task_inputs = [
       create_input('Task', 'Task description'),
@@ -150,7 +140,6 @@ class Pomeruby
       [self, nil]
     else
       @task_inputs[@task_input_focused], command = @task_inputs[@task_input_focused].update(message)
-      @menu, command = @menu.update(message)
       [self, command]
     end
   end

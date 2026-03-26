@@ -1,12 +1,30 @@
 # frozen_string_literal: true
 
-require_relative "../helpers"
+require 'bubbles'
+
+require_relative '../helpers'
 
 module Views
   module Menu
     extend Helpers
 
+    ITEMS = [
+      { title: 'Timer', option: 'timer' },
+      { title: 'Task List', option: 'tasks' },
+    ].freeze
+
     module_function
+
+    def init
+      menu                 = Bubbles::List.new(ITEMS)
+      menu.fill_height     = false
+      menu.show_title      = false
+      menu.show_filter     = false
+      menu.show_pagination = false
+      menu.show_status_bar = false
+
+      menu
+    end
 
     def view(width, content)
       lines = []
