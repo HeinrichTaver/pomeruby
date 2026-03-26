@@ -8,15 +8,17 @@ module Views
 
     module_function
 
-    def view(width, menu)
+    def view(width, content)
       lines = []
-      lines << place_centered(width, 0, text_bold('Pomeruby'))
+
+      lines << place_header(width)
       lines << ''
       lines << ''
-      lines << place_centered(width, 0, menu.view)
+      lines << place_content(width, content.view)
       lines << ''
       lines << ''
-      lines << place_centered(width, 0, text_italic('↑/↓ navigate | enter select | q quit'))
+      lines << place_footer(width, '↑/↓ navigate | enter select | q quit')
+
       lines.join("\n")
     end
   end
