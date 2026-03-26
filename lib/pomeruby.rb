@@ -8,6 +8,7 @@ require 'bubbletea'
 require_relative "pomeruby/config"
 require_relative "pomeruby/database"
 require_relative "pomeruby/helpers"
+require_relative "pomeruby/views"
 
 class Pomeruby
   include Helpers
@@ -157,7 +158,7 @@ class Pomeruby
   def view
     case @current_view
     when 'menu'
-      view_menu
+      Views::Menu.view(@term_width, @menu)
     when 'timer'
       view_timer
     when 'tasks'
@@ -168,18 +169,6 @@ class Pomeruby
   end
 
   private
-
-  def view_menu
-    lines = []
-    lines << place_centered(@term_width, 0, text_bold('Pomeruby'))
-    lines << ''
-    lines << ''
-    lines << place_centered(@term_width, 0, @menu.view)
-    lines << ''
-    lines << ''
-    lines << place_centered(@term_width, 0, text_italic('↑/↓ navigate | enter select | q quit'))
-    lines.join("\n")
-  end
 
   def view_timer
     timer =
