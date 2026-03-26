@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'bubbles'
+
+require_relative '../config'
 require_relative '../helpers'
 
 module Views
@@ -7,6 +10,14 @@ module Views
     extend Helpers
 
     module_function
+
+    def init
+      @@timer = Bubbles::Timer.new(Config::POMO_BLOCK_IN_MINUTES)
+      @@started = false
+      @@paused  = false
+
+      [@@timer, @@started, @@paused]
+    end
 
     def view(width, timer, blocks, started, paused)
       lines = []

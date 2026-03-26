@@ -20,9 +20,7 @@ class Pomeruby
     Views::Menu.init
     @current_view = 'menu'
 
-    @timer         = Bubbles::Timer.new(Config::POMO_BLOCK_IN_MINUTES)
-    @timer_started = false
-    @timer_paused  = false
+    @timer, @timer_started, @timer_paused = Views::Timer.init
 
     @task_blocks = ''
 
@@ -79,7 +77,7 @@ class Pomeruby
       [self, Bubbletea.quit] unless @timer.running?
     when 's'
       unless @timer_started
-        @timer         = Bubbles::Timer.new(Config::POMO_BLOCK_IN_MINUTES)
+        @timer, _, _   = Views::Timer.init
         @timer_started = true
         [self, @timer.init]
       end
