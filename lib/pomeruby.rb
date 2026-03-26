@@ -137,7 +137,7 @@ class Pomeruby
     when 'menu'
       Views::Menu.view(@term_width)
     when 'timer'
-      view_timer
+      Views::Timer.view(@term_width, @timer, @task_blocks, @timer_started, @timer_paused)
     when 'tasks'
       view_tasks
     else
@@ -146,45 +146,6 @@ class Pomeruby
   end
 
   private
-
-  def view_timer
-    timer =
-      if @timer.timed_out?
-        text_bold("Block's up. Pause, now.")
-      elsif @timer_started
-        @timer.view
-      else
-        'Hello, World!'
-      end
-
-    lines = []
-    lines << place_centered(@term_width, 0, text_bold('Pomeruby'))
-    lines <<
-      if @task_blocks.empty?
-        ''
-      else
-        place_centered(@term_width, 0, "Blocks completed: #{@task_blocks}")
-      end
-    lines << ''
-    lines << place_centered(@term_width, 0, timer)
-    lines <<
-      if @timer_paused
-        place_centered(@term_width, 0, '(paused)')
-      else
-        place_centered(@term_width, 0, '')
-      end
-    lines << ''
-    lines << ''
-    lines <<
-      if @timer_paused
-        place_centered(@term_width, 0, text_italic('space toggle | esc menu | q quit'))
-      elsif @timer_started
-        place_centered(@term_width, 0, text_italic('space toggle'))
-      else
-        place_centered(@term_width, 0, text_italic('s start | esc menu | q quit'))
-      end
-    lines.join("\n")
-  end
 
   def view_tasks
     lines = []
