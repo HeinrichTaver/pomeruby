@@ -46,7 +46,10 @@ class Pomeruby
     case message
     when Bubbletea::KeyMessage
       case @current_view
-      when 'menu'  then update_menu_keys(message)
+      when 'menu'
+        command, view = Views::Menu.update(message, @menu)
+        @current_view = view unless view.nil?
+        [self, command]
       when 'timer' then update_timer_keys(message)
       when 'tasks' then update_tasks_keys(message)
       end
@@ -66,20 +69,6 @@ class Pomeruby
       [self, nil]
     else
       [self, nil]
-    end
-  end
-
-  def update_menu_keys(message)
-    case message.to_s
-    when 'q', 'ctrl+c'
-      [self, Bubbletea.quit]
-    when 'enter'
-      @current_view = @menu.selected_item[:option]
-      @menu, command = @menu.update(message)
-      [self, command]
-    else
-      @menu, command = @menu.update(message)
-      [self, command]
     end
   end
 

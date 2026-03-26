@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'bubbles'
+require 'bubbletea'
 
 require_relative '../helpers'
 
@@ -24,6 +25,20 @@ module Views
       menu.show_status_bar = false
 
       menu
+    end
+
+    def update(message, menu)
+      case message.to_s
+      when 'q', 'ctrl+c'
+        [Bubbletea.quit, nil]
+      when 'enter'
+        view = menu.selected_item[:option]
+        menu, command = menu.update(message)
+        [command, view]
+      else
+        menu, command = menu.update(message)
+        [command, nil]
+      end
     end
 
     def view(width, content)
