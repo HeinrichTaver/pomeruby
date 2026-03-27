@@ -4,3 +4,4 @@
 $LOAD_PATH.unshift("#{__dir__}/../lib")
 
 require 'pomeruby'
+Pomeruby::CLI.run
