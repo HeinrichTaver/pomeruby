@@ -39,19 +39,16 @@ class Pomeruby
       when :home
         new_model, command, next_view = Views::Home.update(message, @model_home)
         @model_home = new_model
-        @current_view = next_view unless next_view.nil?
-        [self, command]
       when :tasks
         new_model, command, next_view = Views::Tasks.update(message, @model_tasks)
         @model_tasks = new_model
-        @current_view = next_view unless next_view.nil?
-        [self, command]
       when :timer
         new_model, command, next_view = Views::Timer.update(message, @model_timer)
         @model_timer = new_model
-        @current_view = next_view unless next_view.nil?
-        [self, command]
       end
+
+      @current_view = next_view unless next_view.nil?
+      [self, command]
     end
   end
 
