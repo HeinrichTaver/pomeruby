@@ -13,8 +13,6 @@ module Pomeruby
   class App
     include Bubbletea::Model
 
-    include Helpers
-
     def initialize
       _, @term_width = IO.console.winsize
 
