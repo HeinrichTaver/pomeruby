@@ -10,8 +10,8 @@ module Views
     extend Helpers
 
     ITEMS = [
-      { title: 'Timer', option: 'timer' },
-      { title: 'Task List', option: 'tasks' },
+      { title: 'Timer', option: :timer },
+      { title: 'Task List', option: :tasks },
     ].freeze
 
     module_function

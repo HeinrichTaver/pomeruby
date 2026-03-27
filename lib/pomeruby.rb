@@ -17,8 +17,8 @@ class Pomeruby
   def initialize
     @db = Database.open(Config::POMERUBY_DB)
 
+    @current_view = :home
     Views::Home.init
-    @current_view = 'menu'
 
     @timer, @timer_started, @timer_paused = Views::Timer.init
 
@@ -41,12 +41,12 @@ class Pomeruby
     case message
     when Bubbletea::KeyMessage
       case @current_view
-      when 'menu'
+      when :home
         command, view = Views::Home.update(message)
         @current_view = view unless view.nil?
         [self, command]
-      when 'timer' then update_timer_keys(message)
-      when 'tasks' then update_tasks_keys(message)
+      when :timer then update_timer_keys(message)
+      when :tasks then update_tasks_keys(message)
       end
 
     when Bubbletea::WindowSizeMessage
@@ -85,7 +85,7 @@ class Pomeruby
         [self, @timer.toggle]
       end
     when 'esc'
-      @current_view = 'menu' unless @timer.running?
+      @current_view = :home unless @timer.running?
       [self, nil]
     end
   end
@@ -120,7 +120,7 @@ class Pomeruby
       command = @task_inputs[@task_input_focused].focus
       [self, command]
     when 'esc'
-      @current_view = 'menu' unless @timer.running?
+      @current_view = :home unless @timer.running?
       [self, nil]
     else
       @task_inputs[@task_input_focused], command = @task_inputs[@task_input_focused].update(message)
@@ -130,11 +130,11 @@ class Pomeruby
 
   def view
     case @current_view
-    when 'menu'
+    when :home
       Views::Home.view(@term_width)
-    when 'timer'
+    when :timer
       Views::Timer.view(@term_width, @timer, @timer_started, @timer_paused)
-    when 'tasks'
+    when :tasks
       view_tasks
     else
       raise "view #{@current_view} doesn't exist"
