@@ -3,10 +3,12 @@
 require 'bubbles'
 require 'bubbletea'
 
+require_relative '../helpers'
+
 module Pomeruby
   module Views
     module Tasks
-      extend Helpers
+      extend Pomeruby::Helpers
 
       class Model
         attr_accessor :inputs, :focused, :submitted

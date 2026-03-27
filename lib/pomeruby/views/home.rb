@@ -8,7 +8,7 @@ require_relative '../helpers'
 module Pomeruby
   module Views
     module Home
-      extend Helpers
+      extend Pomeruby::Helpers
 
       class Model
         attr_accessor :menu

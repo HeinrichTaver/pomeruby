@@ -9,7 +9,7 @@ require_relative '../helpers'
 module Pomeruby
   module Views
     module Timer
-      extend Helpers
+      extend Pomeruby::Helpers
 
       class Model
         attr_accessor :timer, :started, :paused, :blocks
