@@ -3,22 +3,26 @@
 require 'lipgloss'
 
 module Helpers
-  @@text_bold = Lipgloss::Style.new.bold(true)
-  @@text_faint = Lipgloss::Style.new.faint(true)
-  @@text_italic = Lipgloss::Style.new.italic(true)
+  TEXT_BOLD   = Lipgloss::Style.new.bold(true)
+  TEXT_FAINT  = Lipgloss::Style.new.faint(true)
+  TEXT_ITALIC = Lipgloss::Style.new.italic(true)
 
   module_function
 
   def text_bold(text)
-    @@text_bold.render(text)
+    TEXT_BOLD.render(text)
   end
 
   def text_faint(text)
-    @@text_faint.render(text)
+    TEXT_FAINT.render(text)
   end
 
   def text_italic(text)
-    @@text_italic.render(text)
+    TEXT_ITALIC.render(text)
+  end
+
+  def place_centered(width, height, text)
+    Lipgloss.place(width, height, :center, :center, text)
   end
 
   def place_header(width)
@@ -31,9 +35,5 @@ module Helpers
 
   def place_footer(width, text)
     place_centered(width, 0, text_faint(text))
-  end
-
-  def place_centered(width, height, text)
-    Lipgloss.place(width, height, :center, :center, text)
   end
 end
