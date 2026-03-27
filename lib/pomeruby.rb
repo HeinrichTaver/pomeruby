@@ -22,8 +22,6 @@ class Pomeruby
 
     @timer, @timer_started, @timer_paused = Views::Timer.init
 
-    @task_blocks = ''
-
     _, @term_width = IO.console.winsize
 
     @task_inputs = [
@@ -62,7 +60,7 @@ class Pomeruby
       [self, command]
     when Bubbles::Timer::TimeoutMessage
       @timer_started = false
-      @task_blocks += 'x'
+      Views::Timer.mark_complete
       [self, nil]
     else
       [self, nil]
@@ -77,7 +75,7 @@ class Pomeruby
       [self, Bubbletea.quit] unless @timer.running?
     when 's'
       unless @timer_started
-        @timer, _, _   = Views::Timer.init
+        @timer, _, _   = Views::Timer.reset
         @timer_started = true
         [self, @timer.init]
       end
@@ -135,7 +133,7 @@ class Pomeruby
     when 'menu'
       Views::Menu.view(@term_width)
     when 'timer'
-      Views::Timer.view(@term_width, @timer, @task_blocks, @timer_started, @timer_paused)
+      Views::Timer.view(@term_width, @timer, @timer_started, @timer_paused)
     when 'tasks'
       view_tasks
     else

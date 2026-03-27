@@ -12,22 +12,23 @@ module Views
     module_function
 
     def init
-      @@timer = Bubbles::Timer.new(Config::POMO_BLOCK_IN_MINUTES)
+      @@timer   = Bubbles::Timer.new(Config::POMO_BLOCK_IN_MINUTES)
       @@started = false
       @@paused  = false
+      @@blocks  = ''
 
       [@@timer, @@started, @@paused]
     end
 
-    def view(width, timer, blocks, started, paused)
+    def view(width, timer, started, paused)
       lines = []
 
       lines << place_header(width)
       lines <<
-        if blocks.empty?
+        if @@blocks.empty?
           ''
         else
-          place_content(width, "Blocks completed: #{@task_blocks}")
+          place_content(width, "Blocks completed: #{@@blocks}")
         end
       lines << ''
       lines <<
@@ -38,7 +39,6 @@ module Views
         else
           place_content(width, 'Hello, World!')
         end
-
       lines <<
         if paused
           place_content(width, '(paused)')
@@ -57,6 +57,16 @@ module Views
         end
 
       lines.join("\n")
+    end
+
+    def reset
+      @@timer = Bubbles::Timer.new(Config::POMO_BLOCK_IN_MINUTES)
+
+      @@timer
+    end
+
+    def mark_complete
+      @@blocks += 'x'
     end
   end
 end
