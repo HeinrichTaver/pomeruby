@@ -11,16 +11,16 @@ require_relative "pomeruby/helpers"
 require_relative "pomeruby/views"
 
 class Pomeruby
-  include Helpers
   include Bubbletea::Model
+
+  include Helpers
 
   def initialize
     @db = Database.open(Config::POMERUBY_DB)
 
     @current_view = :home
     @model_home = Views::Home.init
-
-    @timer, @timer_started, @timer_paused = Views::Timer.init
+    @model_timer = Views::Timer.init
 
     _, @term_width = IO.console.winsize
 
@@ -39,55 +39,25 @@ class Pomeruby
 
   def update(message)
     case message
-    when Bubbletea::KeyMessage
+    when Bubbletea::WindowSizeMessage
+      @term_width = message.width
+
+      [self, nil]
+
+    else
       case @current_view
       when :home
         new_model, command, next_view = Views::Home.update(message, @model_home)
         @model_home = new_model
         @current_view = next_view unless next_view.nil?
         [self, command]
-      when :timer then update_timer_keys(message)
+      when :timer
+        new_model, command, next_view = Views::Timer.update(message, @model_timer)
+        @model_timer = new_model
+        @current_view = next_view unless next_view.nil?
+        [self, command]
       when :tasks then update_tasks_keys(message)
       end
-
-    when Bubbletea::WindowSizeMessage
-      @term_width = message.width
-
-      [self, nil]
-    when Bubbles::Timer::TickMessage, Bubbles::Timer::StartStopMessage
-      [self, nil] unless @timer_started
-
-      @timer, command = @timer.update(message)
-      [self, command]
-    when Bubbles::Timer::TimeoutMessage
-      @timer_started = false
-      Views::Timer.mark_complete
-      [self, nil]
-    else
-      [self, nil]
-    end
-  end
-
-  def update_timer_keys(message)
-    case message.to_s
-    when 'ctrl+c'
-      [self, Bubbletea.quit]
-    when 'q'
-      [self, Bubbletea.quit] unless @timer.running?
-    when 's'
-      unless @timer_started
-        @timer, _, _   = Views::Timer.reset
-        @timer_started = true
-        [self, @timer.init]
-      end
-    when ' ', 'space'
-      if @timer_started
-        @timer_paused = @timer.running?
-        [self, @timer.toggle]
-      end
-    when 'esc'
-      @current_view = :home unless @timer.running?
-      [self, nil]
     end
   end
 
@@ -121,7 +91,7 @@ class Pomeruby
       command = @task_inputs[@task_input_focused].focus
       [self, command]
     when 'esc'
-      @current_view = :home unless @timer.running?
+      @current_view = :home unless @model_timer.timer.running?
       [self, nil]
     else
       @task_inputs[@task_input_focused], command = @task_inputs[@task_input_focused].update(message)
@@ -134,7 +104,7 @@ class Pomeruby
     when :home
       Views::Home.view(@model_home, @term_width)
     when :timer
-      Views::Timer.view(@term_width, @timer, @timer_started, @timer_paused)
+      Views::Timer.view(@model_timer, @term_width)
     when :tasks
       view_tasks
     else
