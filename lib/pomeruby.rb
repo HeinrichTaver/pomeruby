@@ -17,9 +17,9 @@ module Pomeruby
       _, @term_width = IO.console.winsize
 
       @current_view = :home
-      @model_home = Views::Home.init
-      @model_tasks = Views::Tasks.init
-      @model_timer = Views::Timer.init
+      @model_home = Pomeruby::Views::Home.init
+      @model_tasks = Pomeruby::Views::Tasks.init
+      @model_timer = Pomeruby::Views::Timer.init
 
       @db = Database.open(Config::POMERUBY_DB)
     end
@@ -37,13 +37,13 @@ module Pomeruby
       else
         case @current_view
         when :home
-          new_model, command, next_view = Views::Home.update(message, @model_home)
+          new_model, command, next_view = Pomeruby::Views::Home.update(message, @model_home)
           @model_home = new_model
         when :tasks
-          new_model, command, next_view = Views::Tasks.update(message, @model_tasks)
+          new_model, command, next_view = Pomeruby::Views::Tasks.update(message, @model_tasks)
           @model_tasks = new_model
         when :timer
-          new_model, command, next_view = Views::Timer.update(message, @model_timer)
+          new_model, command, next_view = Pomeruby::Views::Timer.update(message, @model_timer)
           @model_timer = new_model
         end
 
@@ -55,11 +55,11 @@ module Pomeruby
     def view
       case @current_view
       when :home
-        Views::Home.view(@model_home, @term_width)
+        Pomeruby::Views::Home.view(@model_home, @term_width)
       when :tasks
-        Views::Tasks.view(@model_tasks, @term_width)
+        Pomeruby::Views::Tasks.view(@model_tasks, @term_width)
       when :timer
-        Views::Timer.view(@model_timer, @term_width)
+        Pomeruby::Views::Timer.view(@model_timer, @term_width)
       else
         raise "view #{@current_view} doesn't exist"
       end
