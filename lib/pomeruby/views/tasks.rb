@@ -26,7 +26,7 @@ module Pomeruby
 
         def create_input(name, placeholder)
           input             = Bubbles::TextInput.new
-          input.prompt      = ""
+          input.prompt      = ''
           input.placeholder = placeholder
 
           input

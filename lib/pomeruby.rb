@@ -4,10 +4,10 @@ require 'io/console'
 
 require 'bubbletea'
 
-require_relative "pomeruby/cli"
-require_relative "pomeruby/config"
-require_relative "pomeruby/database"
-require_relative "pomeruby/views"
+require_relative 'pomeruby/cli'
+require_relative 'pomeruby/config'
+require_relative 'pomeruby/database'
+require_relative 'pomeruby/views'
 
 module Pomeruby
   class App
