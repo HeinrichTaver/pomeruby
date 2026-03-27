@@ -6,7 +6,7 @@ require 'bubbletea'
 require_relative '../helpers'
 
 module Views
-  module Menu
+  module Home
     extend Helpers
 
     ITEMS = [

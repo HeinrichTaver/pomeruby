@@ -17,7 +17,7 @@ class Pomeruby
   def initialize
     @db = Database.open(Config::POMERUBY_DB)
 
-    Views::Menu.init
+    Views::Home.init
     @current_view = 'menu'
 
     @timer, @timer_started, @timer_paused = Views::Timer.init
@@ -42,7 +42,7 @@ class Pomeruby
     when Bubbletea::KeyMessage
       case @current_view
       when 'menu'
-        command, view = Views::Menu.update(message)
+        command, view = Views::Home.update(message)
         @current_view = view unless view.nil?
         [self, command]
       when 'timer' then update_timer_keys(message)
@@ -131,7 +131,7 @@ class Pomeruby
   def view
     case @current_view
     when 'menu'
-      Views::Menu.view(@term_width)
+      Views::Home.view(@term_width)
     when 'timer'
       Views::Timer.view(@term_width, @timer, @timer_started, @timer_paused)
     when 'tasks'
