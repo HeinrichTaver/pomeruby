@@ -21,7 +21,7 @@ module Pomeruby
       @model_tasks = Pomeruby::Views::Tasks.init
       @model_timer = Pomeruby::Views::Timer.init
 
-      @db = Database.open(Config::POMERUBY_DB)
+      @db = Pomeruby::Database.open(Config::POMERUBY_DB)
     end
 
     def init

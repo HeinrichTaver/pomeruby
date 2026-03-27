@@ -2,13 +2,12 @@
 
 require 'sqlite3'
 
-module Database
-  module_function
-
-  def create(database)
-    SQLite3::Database.new(database) do |db|
-      db.foreign_keys = 'ON'
-      db.execute <<-SQL
+module Pomeruby
+  module Database
+    def self.create(database)
+      SQLite3::Database.new(database) do |db|
+        db.foreign_keys = 'ON'
+        db.execute <<-SQL
         CREATE TABLE tasks
           ( id          INTEGER PRIMARY KEY
           , created_at  TEXT    DEFAULT CURRENT_TIMESTAMP NOT NULL
@@ -19,9 +18,9 @@ module Database
           , blocks_est  INTEGER
           , blocks_act  TEXT
           );
-      SQL
+        SQL
 
-      db.execute <<-SQL
+        db.execute <<-SQL
         CREATE TRIGGER update_tasks_updated_at
         AFTER UPDATE ON tasks
         BEGIN
@@ -29,15 +28,16 @@ module Database
               SET updated_at = CURRENT_TIMESTAMP
             WHERE id = OLD.id;
         END;
-      SQL
+        SQL
+      end
     end
-  end
 
-  def open(database)
-    Dir.mkdir(File.dirname(database)) unless Dir.exist?(File.dirname(database))
+    def self.open(database)
+      Dir.mkdir(File.dirname(database)) unless Dir.exist?(File.dirname(database))
 
-    create database unless File.exist?(database)
+      create database unless File.exist?(database)
 
-    SQLite3::Database.new(database)
+      SQLite3::Database.new(database)
+    end
   end
 end
