@@ -17,6 +17,7 @@ module Pomeruby
                         CHECK(status IN ('open', 'in_progress', 'done'))
           , blocks_est  INTEGER
           , blocks_act  TEXT
+          , deadline    TEXT
           );
         SQL
 

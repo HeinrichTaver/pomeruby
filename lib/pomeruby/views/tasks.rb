@@ -17,6 +17,7 @@ module Pomeruby
           @inputs    = [
             create_input('Task', 'Task description'),
             create_input('Estimation', '(Optional) How many blocks will it take'),
+            create_input('Deadline', '(Optional) Due date for this task'),
           ]
           @focused   = 0
           @submitted = false
@@ -103,7 +104,7 @@ module Pomeruby
         lines << ''
 
         model.inputs.each_with_index do |input, i|
-          label = ['Task:', 'Estimation:'][i]
+          label = ['Task:', 'Estimation:', 'Deadline:'][i]
           model.inputs[model.focused].focus if i == 0
           lines << "#{'%-11s' % label} #{input.view}"
         end
