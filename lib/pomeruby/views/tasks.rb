@@ -10,15 +10,19 @@ module Pomeruby
     module Tasks
       extend Pomeruby::Helpers
 
+      FIELDS = [
+        { label: 'Task'       , placeholder: 'Task description' },
+        { label: 'Estimation' , placeholder: '(Optional} How many blocks will it take' },
+        { label: 'Deadline'   , placeholder: '(Optional} Due date for this task' },
+      ]
+
       class Model
         attr_accessor :inputs, :focused, :submitted
 
         def initialize
-          @inputs    = [
-            create_input('Task', 'Task description'),
-            create_input('Estimation', '(Optional) How many blocks will it take'),
-            create_input('Deadline', '(Optional) Due date for this task'),
-          ]
+          @inputs = FIELDS.map do |input|
+            create_input(input[:label], input[:placeholder])
+          end
           @focused   = 0
           @submitted = false
         end
@@ -103,10 +107,9 @@ module Pomeruby
         lines << place_content(width, 'Tasks, whither have ye gone?')
         lines << ''
 
-        model.inputs.each_with_index do |input, i|
-          label = ['Task:', 'Estimation:', 'Deadline:'][i]
-          model.inputs[model.focused].focus if i == 0
-          lines << "#{'%-11s' % label} #{input.view}"
+        model.inputs.each_with_index do |input, idx|
+          model.inputs[model.focused].focus if idx == 0
+          lines << "#{'%-11s' % FIELDS[idx][:label]}: #{input.view}"
         end
 
         lines <<
