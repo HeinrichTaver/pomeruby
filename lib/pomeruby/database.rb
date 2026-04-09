@@ -36,7 +36,7 @@ module Pomeruby
     def self.open(database)
       Dir.mkdir(File.dirname(database)) unless Dir.exist?(File.dirname(database))
 
-      create database unless File.exist?(database)
+      create(database) unless File.exist?(database)
 
       SQLite3::Database.new(database)
     end

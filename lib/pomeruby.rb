@@ -17,7 +17,8 @@ module Pomeruby
       _, @term_width = IO.console.winsize
 
       @current_view = :home
-      @model_home = Pomeruby::Views::Home.init
+
+      @model_home  = Pomeruby::Views::Home.init
       @model_tasks = Pomeruby::Views::Tasks.init
       @model_timer = Pomeruby::Views::Timer.init
 
