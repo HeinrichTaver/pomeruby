@@ -75,5 +75,18 @@ module Pomeruby
 
       row_id
     end
+
+    def self.task_listing(database)
+      tasks = []
+
+      SQLite3::Database.new(database) do |db|
+        db.foreign_keys = 'ON'
+        db.execute('SELECT description FROM tasks') do |row|
+          tasks << row
+        end
+      end
+
+      tasks
+    end
   end
 end

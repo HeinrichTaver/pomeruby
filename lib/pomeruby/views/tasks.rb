@@ -19,7 +19,7 @@ module Pomeruby
       ]
 
       class Model
-        attr_accessor :inputs, :focused, :submitted
+        attr_accessor :inputs, :focused, :submitted, :new_task
 
         def initialize
           @inputs = FIELDS.map do |input|
@@ -27,6 +27,7 @@ module Pomeruby
           end
           @focused   = 0
           @submitted = 0
+          @new_task  = false
         end
 
         private
@@ -51,10 +52,22 @@ module Pomeruby
           when 'ctrl+c'
             [model, Bubbletea.quit, nil]
           when 'q'
-            return [model, Bubbletea.quit, nil] unless model.submitted.zero?
+            return [model, Bubbletea.quit, nil] unless model.new_task && model.submitted.zero?
 
             new_model = model.dup
             new_model.inputs[model.focused], command = model.inputs[model.focused].update(message)
+
+            [new_model, command, nil]
+          when 'n'
+            if model.new_task
+              new_model = model.dup
+              new_model.inputs[model.focused], command = model.inputs[model.focused].update(message)
+
+              return [new_model, command, nil]
+            end
+
+            new_model = model.dup
+            new_model.new_task = true
 
             [new_model, command, nil]
           when 'tab', 'down'
@@ -112,8 +125,39 @@ module Pomeruby
 
         lines << place_header(width)
         lines << ''
-        lines << place_content(width, 'Tasks, whither have ye gone?')
+        lines <<
+          if model.new_task
+            view_task_new(model, width)
+          else
+            view_task_listing(model, width)
+          end
+
+        lines.join("\n")
+      end
+
+      def self.view_task_listing(model, width)
+        tasks = Pomeruby::Database.task_listing(Config::POMERUBY_DB)
+
+        lines = []
+
         lines << ''
+
+        if tasks.empty?
+          lines << place_content(width, 'Tasks, whither have ye gone?')
+        else
+          tasks.each do |task|
+            lines << place_content(width, task[0])
+          end
+        end
+
+        lines << ''
+        lines << place_footer(width, 'n new | esc menu | q quit')
+
+        lines.join("\n")
+      end
+
+      def self.view_task_new(model, width)
+        lines = []
 
         model.inputs.each_with_index do |input, idx|
           model.inputs[model.focused].focus if idx == 0
@@ -126,6 +170,7 @@ module Pomeruby
           else
             ''
           end
+        lines << ''
         lines <<
           if model.submitted.nonzero?
             place_footer(width, 'esc menu | q quit')
