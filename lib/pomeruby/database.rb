@@ -14,7 +14,7 @@ module Pomeruby
           , updated_at  TEXT    DEFAULT CURRENT_TIMESTAMP NOT NULL
           , description TEXT    UNIQUE                    NOT NULL
           , status      TEXT    DEFAULT 'open'            NOT NULL
-                        CHECK(status IN ('open', 'in_progress', 'done'))
+                        CHECK(status IN ('open', 'in_progress', 'done', 'canceled'))
           , blocks_est  INTEGER
           , blocks_act  TEXT
           , deadline    TEXT
