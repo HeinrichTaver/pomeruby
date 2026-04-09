@@ -3,6 +3,8 @@
 require 'bubbles'
 require 'bubbletea'
 
+require_relative '../config'
+require_relative '../database'
 require_relative '../helpers'
 
 module Pomeruby
@@ -24,7 +26,7 @@ module Pomeruby
             create_input(input[:label], input[:placeholder])
           end
           @focused   = 0
-          @submitted = false
+          @submitted = 0
         end
 
         private
@@ -49,7 +51,7 @@ module Pomeruby
           when 'ctrl+c'
             [model, Bubbletea.quit, nil]
           when 'q'
-            return [model, Bubbletea.quit, nil] if model.submitted
+            return [model, Bubbletea.quit, nil] unless model.submitted.zero?
 
             new_model = model.dup
             new_model.inputs[model.focused], command = model.inputs[model.focused].update(message)
@@ -82,7 +84,13 @@ module Pomeruby
 
               [new_model, command, nil]
             else
-              new_model.submitted = true unless model.inputs[0].value.empty?
+              new_model.submitted = Pomeruby::Database.task_insert(
+                Config::POMERUBY_DB, {
+                  id: model.submitted,
+                  task: model.inputs[0].value,
+                  estimation: model.inputs[1].value || nil,
+                  deadline: model.inputs[2].value || nil
+                })
 
               [new_model, nil, nil]
             end
@@ -113,13 +121,13 @@ module Pomeruby
         end
 
         lines <<
-          if model.submitted
-            'Submitted'
+          if model.submitted.nonzero?
+            "Submitted as id #{model.submitted}"
           else
             ''
           end
         lines <<
-          if model.submitted
+          if model.submitted.nonzero?
             place_footer(width, 'esc menu | q quit')
           else
             place_footer(width, 'esc menu')
